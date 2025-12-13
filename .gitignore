@@ -2,6 +2,6 @@
 !*/
 SDL2-2.0.10/
 !*.cpp
-!*.h
+!*.hh
 !*.bmp
 !.gitignore

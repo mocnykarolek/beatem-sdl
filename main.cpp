@@ -2,8 +2,8 @@
 #include<math.h>
 #include<stdio.h>
 #include<string.h>
-#include "logic.h"
-#include "draw.h"
+#include "logic.hh"
+#include "draw.hh"
 
 extern "C" {
 #include"./SDL2-2.0.10/include/SDL.h"
@@ -86,20 +86,16 @@ int main(int argc, char **argv) {
 	eti = SDL_LoadBMP("./eti.bmp");
 	if(eti == NULL) {
 		printf("SDL_LoadBMP(eti.bmp) error: %s\n", SDL_GetError());
-		SDL_FreeSurface(charset);
-		SDL_FreeSurface(screen);
-		SDL_DestroyTexture(scrtex);
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(renderer);
+		screenObj->~Screen();
 		SDL_Quit();
 		return 1;
 		};
 
 	char text[128];
-	int czarny = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
-	int zielony = SDL_MapRGB(screen->format, 0x00, 0xFF, 0x00);
-	int czerwony = SDL_MapRGB(screen->format, 0xFF, 0x00, 0x00);
-	int niebieski = SDL_MapRGB(screen->format, 0x11, 0x11, 0xCC);
+	int czarny = SDL_MapRGB(screenObj->GetFormat(), 0x00, 0x00, 0x00);
+	int zielony = SDL_MapRGB(screenObj->GetFormat(), 0x00, 0xFF, 0x00);
+	int czerwony = SDL_MapRGB(screenObj->GetFormat(), 0xFF, 0x00, 0x00);
+	int niebieski = SDL_MapRGB(screenObj->GetFormat(), 0x11, 0x11, 0xCC);
 
 	t1 = SDL_GetTicks();
 
@@ -128,9 +124,9 @@ int main(int argc, char **argv) {
 
 		distance += etiSpeed * delta;
 
-		SDL_FillRect(screen, NULL, czarny);
+		SDL_FillRect(screenObj->screen, NULL, czarny);
 
-		DrawSurface(screen, eti,
+		screenObj->DrawSurface(screenObj->screen, eti,
 		            SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
 			    SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
 
@@ -142,18 +138,18 @@ int main(int argc, char **argv) {
 			};
 
 		// tekst informacyjny / info text
-		DrawRectangle(screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
+		screenObj->DrawRectangle(screenObj->screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
 		//            "template for the second project, elapsed time = %.1lf s  %.0lf frames / s"
 		sprintf(text, "Szablon drugiego zadania, czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
-		DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 10, text, charset);
+		screenObj->DrawString(screenObj->screen, screenObj->screen->w / 2 - strlen(text) * 8 / 2, 10, text, screenObj->charset);
 		//	      "Esc - exit, \030 - faster, \031 - slower"
 		sprintf(text, "Esc - wyjscie, \030 - przyspieszenie, \031 - zwolnienie");
-		DrawString(screen, screen->w / 2 - strlen(text) * 8 / 2, 26, text, charset);
+		screenObj->DrawString(screenObj->screen, screenObj->screen->w / 2 - strlen(text) * 8 / 2, 26, text, screenObj->charset);
 
-		SDL_UpdateTexture(scrtex, NULL, screen->pixels, screen->pitch);
+		SDL_UpdateTexture(screenObj->scrtex, NULL, screenObj->screen->pixels, screenObj->screen->pitch);
 //		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, scrtex, NULL, NULL);
-		SDL_RenderPresent(renderer);
+		SDL_RenderCopy(screenObj->renderer, screenObj->scrtex, NULL, NULL);
+		SDL_RenderPresent(screenObj->renderer);
 
 		// obs³uga zdarzeñ (o ile jakieœ zasz³y) / handling of events (if there were any)
 		while(SDL_PollEvent(&event)) {
