@@ -4,9 +4,7 @@ extern "C" {
 #include"./SDL2-2.0.10/include/SDL_main.h"
 }
 #include <stdio.h>
-class Screen {
-private:
-	
+class Scr {
 public:
 	SDL_Texture* scrtex;
 	SDL_Window* window;
@@ -14,7 +12,7 @@ public:
 	SDL_Renderer* renderer;
 	SDL_Surface* charset;
 	SDL_Surface* screen;
-	Screen(int width, int heigh) {
+	Scr(int width, int heigh) {
 		int rc = SDL_CreateWindowAndRenderer(width, heigh, 0,
 			&window, &renderer);
 		if (rc != 0) {
@@ -46,12 +44,13 @@ public:
 		SDL_SetColorKey(charset, true, 0x000000);
 	}
 
-	~Screen() {
+	~Scr() {
 		SDL_FreeSurface(charset);
 		SDL_FreeSurface(screen);
 		SDL_DestroyTexture(scrtex);
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
+		printf("memory has been relested");
 	}
 
 	SDL_PixelFormat* GetFormat() {
@@ -77,6 +76,7 @@ public:
 			SDL_BlitSurface(charset, &s, screen, &d);
 			x += 8;
 			text++;
+			
 		};
 	};
 	void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 color) {

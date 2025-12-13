@@ -13,34 +13,10 @@ extern "C" {
 #define SCREEN_WIDTH	640
 #define SCREEN_HEIGHT	480
 #define nigga 3
-
-// narysowanie napisu txt na powierzchni screen, zaczynaj¹c od punktu (x, y)
-// charset to bitmapa 128x128 zawieraj¹ca znaki
-// draw a text txt on surface screen, starting from the point (x, y)
-// charset is a 128x128 bitmap containing character images
-
-
-
-// narysowanie na ekranie screen powierzchni sprite w punkcie (x, y)
-// (x, y) to punkt œrodka obrazka sprite na ekranie
-// draw a surface sprite on a surface screen in point (x, y)
-// (x, y) is the center of sprite on screen
-
-
-
-// rysowanie pojedynczego pixela
-// draw a single pixel
-
-
-
-// rysowanie linii o d³ugoœci l w pionie (gdy dx = 0, dy = 1) 
-// b¹dŸ poziomie (gdy dx = 1, dy = 0)
-// draw a vertical (when dx = 0, dy = 1) or horizontal (when dx = 1, dy = 0) line
-
-
-
-// rysowanie prostok¹ta o d³ugoœci boków l i k
-// draw a rectangle of size l by k
+#define UP 1
+#define DOWN 2
+#define LEFT 3
+#define RIGHT 4
 
 
 
@@ -66,30 +42,18 @@ int main(int argc, char **argv) {
 	printf("wyjscie printfa trafia do tego okienka\n");
 	printf("printf output goes here\n");
 
-	Screen* screenObj = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	// tryb pe³noekranowy / fullscreen mode
-//	rc = SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP,
-//	                                 &window, &renderer);
-	
-	
-	
-	
-
-
-	// wy³¹czenie widocznoœci kursora myszy
-	
-
-	// wczytanie obrazka cs8x8.bmp
+	Scr* screenObj = new Scr(SCREEN_WIDTH, SCREEN_HEIGHT); // objekt ekranu
 
 
 	eti = SDL_LoadBMP("./eti.bmp");
 	if(eti == NULL) {
 		printf("SDL_LoadBMP(eti.bmp) error: %s\n", SDL_GetError());
-		screenObj->~Screen();
+		screenObj->~Scr();
 		SDL_Quit();
 		return 1;
 		};
+
+
 
 	char text[128];
 	int czarny = SDL_MapRGB(screenObj->GetFormat(), 0x00, 0x00, 0x00);
@@ -107,7 +71,18 @@ int main(int argc, char **argv) {
 	distance = 0;
 	etiSpeed = 1;
 
+	Player* gracz = new Player();
+	gracz->x = SCREEN_WIDTH / 2;
+	gracz->y = SCREEN_WIDTH / 2;
+	gracz->w = 10;
+	gracz->h = 10;
+	gracz->speed = 100;
+
+
+
 	while(!quit) {
+
+		
 
 		t2 = SDL_GetTicks();
 
@@ -130,6 +105,8 @@ int main(int argc, char **argv) {
 		            SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
 			    SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
 
+
+
 		fpsTimer += delta;
 		if(fpsTimer > 0.5) {
 			fps = frames * 2;
@@ -138,7 +115,7 @@ int main(int argc, char **argv) {
 			};
 
 		// tekst informacyjny / info text
-		screenObj->DrawRectangle(screenObj->screen, 4, 4, SCREEN_WIDTH - 8, 36, czerwony, niebieski);
+		screenObj->DrawRectangle(screenObj->screen, 4, 4, SCREEN_WIDTH - 8, 36, zielony, niebieski);
 		//            "template for the second project, elapsed time = %.1lf s  %.0lf frames / s"
 		sprintf(text, "Szablon drugiego zadania, czas trwania = %.1lf s  %.0lf klatek / s", worldTime, fps);
 		screenObj->DrawString(screenObj->screen, screenObj->screen->w / 2 - strlen(text) * 8 / 2, 10, text, screenObj->charset);
@@ -146,10 +123,28 @@ int main(int argc, char **argv) {
 		sprintf(text, "Esc - wyjscie, \030 - przyspieszenie, \031 - zwolnienie");
 		screenObj->DrawString(screenObj->screen, screenObj->screen->w / 2 - strlen(text) * 8 / 2, 26, text, screenObj->charset);
 
+		sprintf(text, "nigger");
+		screenObj->DrawString(screenObj->screen, SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 7, SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 7, text, screenObj->charset);
+
+		screenObj->DrawRectangle(screenObj->screen, gracz->x, gracz->y, gracz->w, gracz->h, czerwony, niebieski);
+
+		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
+
+		if(currentKeyStates[SDL_SCANCODE_W]) gracz->updatePosition(UP, delta);
+		if (currentKeyStates[SDL_SCANCODE_S]) gracz->updatePosition(DOWN,delta);
+		if (currentKeyStates[SDL_SCANCODE_A]) gracz->updatePosition(LEFT, delta);
+		if (currentKeyStates[SDL_SCANCODE_D]) gracz->updatePosition(RIGHT, delta);
+		
+
+
+
 		SDL_UpdateTexture(screenObj->scrtex, NULL, screenObj->screen->pixels, screenObj->screen->pitch);
 //		SDL_RenderClear(renderer);
 		SDL_RenderCopy(screenObj->renderer, screenObj->scrtex, NULL, NULL);
 		SDL_RenderPresent(screenObj->renderer);
+		
+
+		
 
 		// obs³uga zdarzeñ (o ile jakieœ zasz³y) / handling of events (if there were any)
 		while(SDL_PollEvent(&event)) {
@@ -162,6 +157,7 @@ int main(int argc, char **argv) {
 					
 					break;
 				case SDL_KEYUP:
+
 					etiSpeed = 1.0;
 					break;
 				case SDL_QUIT:
