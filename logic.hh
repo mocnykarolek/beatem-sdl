@@ -4,33 +4,30 @@
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
-
+#include "draw.hh"
 void n();
 
 class Player {
 	public:
 		double x, y, speed;
 		int w, h;
+
+		Player(double x, double y, int w, int h, double speed);
+		void drawPlayer(Scr* s, int color_i, int color_o);
+		void updatePosition(int direction, double delta);
+		void borderCollision(int screen_width, int screen_height);
+
+};
+
+class Enemy {
+public:
+	double x, y, speed;
+	int w, h;
+
+	Enemy(double x, double y, int w, int h, double speed);
+
+	void drawEnemy(Scr* s, int color_i, int color_o);
 		
-		void updatePosition(int direction, double delta) {
-			if (direction == UP) {
-				this->y -= this->speed * delta;
-				printf("ruch do gory\n");
-			}
-			if (direction == DOWN) {
-				this->y += this->speed * delta;
-				printf("ruch do gory\n");
-			}
-			if (direction == LEFT) {
-				this->x -= this->speed * delta;
-				printf("ruch do gory\n");
-			}
-			if (direction == RIGHT) {
-				this->x += this->speed * delta;
-				printf("ruch do gory\n");
-			}
-			
-		}
 
 
 };

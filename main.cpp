@@ -71,12 +71,8 @@ int main(int argc, char **argv) {
 	distance = 0;
 	etiSpeed = 1;
 
-	Player* gracz = new Player();
-	gracz->x = SCREEN_WIDTH / 2;
-	gracz->y = SCREEN_WIDTH / 2;
-	gracz->w = 10;
-	gracz->h = 10;
-	gracz->speed = 100;
+	Player* gracz = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT /2, 10, 10 ,100);
+	Enemy* enemy1 = new Enemy(1,1, 20, 20 ,100);
 
 
 
@@ -85,7 +81,8 @@ int main(int argc, char **argv) {
 		
 
 		t2 = SDL_GetTicks();
-
+		
+		//printf("Czas dt: %f\n", t2-t1);
 		// w tym momencie t2-t1 to czas w milisekundach,
 		// jaki uplyna³ od ostatniego narysowania ekranu
 		// delta to ten sam czas w sekundach
@@ -93,6 +90,7 @@ int main(int argc, char **argv) {
 		// the last screen was drawn
 		// delta is the same time in seconds
 		delta = (t2 - t1) * 0.001;
+		//printf("Delta time: %f\n", delta);
 		t1 = t2;
 
 		worldTime += delta;
@@ -126,10 +124,13 @@ int main(int argc, char **argv) {
 		sprintf(text, "nigger");
 		screenObj->DrawString(screenObj->screen, SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 7, SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 7, text, screenObj->charset);
 
-		screenObj->DrawRectangle(screenObj->screen, gracz->x, gracz->y, gracz->w, gracz->h, czerwony, niebieski);
+		enemy1->drawEnemy(screenObj, czerwony, czerwony);
+
+		gracz->drawPlayer(screenObj, zielony, niebieski);
+
 
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-
+		gracz->borderCollision(SCREEN_WIDTH, SCREEN_HEIGHT);
 		if(currentKeyStates[SDL_SCANCODE_W]) gracz->updatePosition(UP, delta);
 		if (currentKeyStates[SDL_SCANCODE_S]) gracz->updatePosition(DOWN,delta);
 		if (currentKeyStates[SDL_SCANCODE_A]) gracz->updatePosition(LEFT, delta);
