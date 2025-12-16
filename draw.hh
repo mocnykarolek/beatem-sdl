@@ -6,6 +6,8 @@ extern "C" {
 #include <stdio.h>
 class Scr {
 public:
+
+	
 	SDL_Texture* scrtex;
 	SDL_Window* window;
 
@@ -72,9 +74,13 @@ public:
 			px = (c % 16) * 8;
 			py = (c / 16) * 8;
 			s.x = px;
+
 			s.y = py;
+
 			d.x = x;
+
 			d.y = y;
+
 			SDL_BlitSurface(charset, &s, screen, &d);
 			x += 8;
 			text++;

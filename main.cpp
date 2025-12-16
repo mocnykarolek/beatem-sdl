@@ -4,6 +4,8 @@
 #include<string.h>
 #include "logic.hh"
 #include "draw.hh"
+#include <ctime>
+#include <cstdlib>
 
 extern "C" {
 #include"./SDL2-2.0.10/include/SDL.h"
@@ -17,6 +19,15 @@ extern "C" {
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
+#define FPS 240
+#define WORLD_WIDTH  2000
+#define WORLD_HEIGHT 480
+#define IDLE 0
+#define ATTACK 1
+#define DEFEND 2 
+
+
+
 
 
 
@@ -25,6 +36,8 @@ extern "C" {
 extern "C"
 #endif
 int main(int argc, char **argv) {
+
+	srand(time(NULL));
 	int t1, t2, quit, frames;
 	double delta, worldTime, fpsTimer, fps, distance, etiSpeed;
 
@@ -71,14 +84,36 @@ int main(int argc, char **argv) {
 	distance = 0;
 	etiSpeed = 1;
 	double cam_pos_x = 0;
+	double cam_pos_x_max = WORLD_WIDTH - SCREEN_WIDTH;
+	const int frame_delay = 1000 / FPS;
 
-	Player* gracz = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT /2, 10, 10 ,100);
-	Enemy* enemy1 = new Enemy(SCREEN_WIDTH /3,SCREEN_HEIGHT / 3, 20, 20 ,100);
+	Player* gracz = new Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT /2, 10, 10 ,100, 100);
+	Enemy* enemy1 = new Enemy(SCREEN_WIDTH /3,SCREEN_HEIGHT / 3, 20, 20 ,100, 20);
+
+	Enemy* enemies = new Enemy[10];
 
 
+	for (int i = 0; i < 10; i++)
+	{
+		enemies[i].w = 20;
+		enemies[i].h = 20;
+		enemies[i].x = (rand() % WORLD_WIDTH) - enemies[i].w;
+		enemies[i].y = (rand() % (WORLD_HEIGHT - 30)) - enemies[i].h + 30;
+		
 
+	}
+
+	//Vector v1;
+	//Vector v2(1, 4);
+
+	//v1.print();
+	//v2.print();
+
+	
+	Uint32 frameStart;
 	while(!quit) {
 
+		frameStart = SDL_GetTicks();
 		
 
 		t2 = SDL_GetTicks();
@@ -96,12 +131,16 @@ int main(int argc, char **argv) {
 
 		worldTime += delta;
 
+
+
+
+
 		distance += etiSpeed * delta;
 
 		SDL_FillRect(screenObj->screen, NULL, czarny);
 
 		screenObj->DrawSurface(screenObj->screen, eti,
-		            SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3,
+		            (SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 3)-cam_pos_x,
 			    SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 3);
 
 
@@ -123,16 +162,22 @@ int main(int argc, char **argv) {
 		screenObj->DrawString(screenObj->screen, screenObj->screen->w / 2 - strlen(text) * 8 / 2, 26, text, screenObj->charset);
 
 		sprintf(text, "nigger");
-		screenObj->DrawString(screenObj->screen, SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 7, SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 7, text, screenObj->charset);
+		screenObj->DrawString(screenObj->screen, (SCREEN_WIDTH / 2 + sin(distance) * SCREEN_HEIGHT / 7) - cam_pos_x, SCREEN_HEIGHT / 2 + cos(distance) * SCREEN_HEIGHT / 7, text, screenObj->charset);
 
 		enemy1->drawEnemy(screenObj, czerwony, czerwony, cam_pos_x);
 
 		gracz->drawPlayer(screenObj, zielony, niebieski, cam_pos_x);
+		
+		for (int i = 0; i < 10; i++)
+		{
+			enemies[i].drawEnemy(screenObj, czerwony, czerwony, cam_pos_x);
+		}
+		
 
 		CheckEnemyPlayerCollision(gracz, enemy1);
 
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
-		gracz->borderCollision(SCREEN_WIDTH, SCREEN_HEIGHT);
+		gracz->borderCollision(WORLD_WIDTH, WORLD_HEIGHT);
 		if(currentKeyStates[SDL_SCANCODE_W]) gracz->updatePosition(UP, delta, &cam_pos_x);
 		if (currentKeyStates[SDL_SCANCODE_S]) gracz->updatePosition(DOWN,delta, &cam_pos_x);
 		if (currentKeyStates[SDL_SCANCODE_A]) gracz->updatePosition(LEFT, delta, &cam_pos_x);
@@ -169,9 +214,10 @@ int main(int argc, char **argv) {
 				};
 			};
 		frames++;
+			if (frame_delay > (SDL_GetTicks() - frameStart)) SDL_Delay(frame_delay - (SDL_GetTicks() - frameStart));
 		};
 
-	// zwolnienie powierzchni / freeing all surfaces
+	
 	
 
 	SDL_Quit();
